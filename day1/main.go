@@ -15,12 +15,6 @@ func main() {
 }
 
 func one(filename string) {
-
-	// read input in
-	// we can read the input in first and then sort, OR we can split the lists and then sort them
-	// sort left list
-	// sort right list
-
 	input := script.File(filename)
 	left, err := input.Column(1).Slice()
 
@@ -33,8 +27,6 @@ func one(filename string) {
 	if err != nil {
 		panic(err)
 	}
-
-	// sort the two lists into ascending pairs
 
 	slices.Sort(left)
 	slices.Sort(right)
@@ -64,15 +56,51 @@ func one(filename string) {
 }
 
 func two(filename string) {
-	// get left list
-	// get right list
-	// for each in left list
-	//
-	input := script.File(filename)
-	right, err := input.Column(2).Freq().Slice()
+	right, err := script.File(filename).Column(2).Freq().Slice()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("%v\n", right)
+	rightNumbers, err := script.Slice(right).Column(2).Slice()
+	if err != nil {
+		panic(err)
+	}
+
+	rightFreq, err := script.Slice(right).Column(1).Slice()
+	if err != nil {
+		panic(err)
+	}
+
+	if len(rightNumbers) != len(rightFreq) {
+		panic("list sizes don't match")
+	}
+
+	left, err := script.File(filename).Column(1).Slice()
+	if err != nil {
+		panic(err)
+	}
+
+	score := 0
+
+	for _, n := range left {
+		i := slices.Index(rightNumbers, n)
+		if i < 0 {
+			// not present
+			continue
+		}
+
+		freq, err := strconv.Atoi(rightFreq[i])
+		if err != nil {
+			panic(err)
+		}
+
+		nInt, err := strconv.Atoi(n)
+		if err != nil {
+			panic(err)
+		}
+
+		score += freq * nInt
+	}
+
+	fmt.Printf("score: %d\n", score)
 }
