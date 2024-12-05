@@ -14,82 +14,73 @@ func main() {
 	util.Init(one, two)
 }
 
-type Report struct{}
-
 func one(file *os.File) {
 	scanner := bufio.NewScanner(file)
+	numSafe := 0
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		levels := strings.Split(line, " ")
+		increasing := false
+		decreasing := false
 		safe := true
 
 		// this is just parsing the middle of the array, so it's not getting to the edges
 		// we could maybe stop the loop after we know a level isn't safe
-		for i := 1; i < len(levels)-1; i++ {
+		for i := 1; i < len(levels); i++ {
 			l := parseLevel(
 				levels[i],
 				levels[i-1],
-				levels[i+1],
 			)
-
-			fmt.Println(l)
-
 			absDistPrev := math.Abs(float64(l.distancePrev()))
-			absDistNext := math.Abs(float64(l.distanceNext()))
-			adjacentRule := absDistPrev >= 1 && absDistPrev <= 3 && absDistNext >= 1 && absDistNext <= 3
+			adjacentRule := absDistPrev >= 1 && absDistPrev <= 3
+
+			if l.distancePrev() > 0 {
+				increasing = true
+			} else if l.distancePrev() < 0 {
+				decreasing = true
+			}
 
 			if safe {
-				safe = adjacentRule
+				safe = adjacentRule && increasing != decreasing
 			}
 		}
-		fmt.Printf("Safe: %v\n", safe)
+		if safe {
+			numSafe++
+		}
 	}
 
-	safe := 0
-	fmt.Printf("Number of safe reports: %d\n", safe)
+	fmt.Printf("Number of safe reports: %d\n", numSafe)
 
 }
 
 type ParsedLevel struct {
 	lvl  int
 	prev int
-	next int
 }
 
 func (p ParsedLevel) distancePrev() int {
 	return p.prev - p.lvl
 }
-func (p ParsedLevel) distanceNext() int {
-	return p.next - p.lvl
-}
 
 func (p ParsedLevel) String() string {
-	return fmt.Sprintf("\nLvl: %d\nPrev: %d\nNext:%d\n",
+	return fmt.Sprintf("\nLvl: %d\nPrev: %d\n",
 		p.lvl,
 		p.distancePrev(),
-		p.distanceNext(),
 	)
 }
 
-func parseLevel(lvl, prev, next string) ParsedLevel {
+func parseLevel(lvl, prev string) ParsedLevel {
 	l, err := strconv.Atoi(lvl)
 	util.Err(err)
 
 	p, err := strconv.Atoi(prev)
 	util.Err(err)
 
-	n, err := strconv.Atoi(next)
-	util.Err(err)
-
 	return ParsedLevel{
 		lvl:  l,
 		prev: p,
-		next: n,
 	}
-}
-
-func checkReports(rps []Report) int {
-	return 0
 }
 
 func two(inputFile *os.File) {

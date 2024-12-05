@@ -62,3 +62,9 @@ func InitScript(one func(inputFilename string), two func(inputFilename string)) 
 	endTime := time.Now()
 	fmt.Printf("completed in %v ms\n", endTime.Sub(startTime).Milliseconds())
 }
+
+func Err(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
