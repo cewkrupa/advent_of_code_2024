@@ -83,6 +83,61 @@ func parseLevel(lvl, prev string) ParsedLevel {
 	}
 }
 
-func two(inputFile *os.File) {
-	panic("not impelmented")
+func two(file *os.File) {
+	scanner := bufio.NewScanner(file)
+	numSafe := 0
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		levels := strings.Split(line, " ")
+
+		firstCheck := checkLevels(levels)
+		if firstCheck {
+			numSafe++
+			continue
+		}
+
+		for i := 0; i < len(levels); i++ {
+			pre := levels[:i]
+			post := levels[i+1:]
+			subset := []string{}
+			subset = append(subset, pre...)
+			subset = append(subset, post...)
+
+			check := checkLevels(subset)
+			if check {
+				numSafe++
+				break
+			}
+		}
+	}
+
+	fmt.Printf("Number of safe reports: %d\n", numSafe)
+}
+
+func checkLevels(levels []string) bool {
+	increasing := false
+	decreasing := false
+	safe := true
+	for i := 1; i < len(levels); i++ {
+		l := parseLevel(
+			levels[i],
+			levels[i-1],
+		)
+		absDistPrev := math.Abs(float64(l.distancePrev()))
+		adjacentRule := absDistPrev >= 1 && absDistPrev <= 3
+
+		if l.distancePrev() > 0 {
+			increasing = true
+		} else if l.distancePrev() < 0 {
+			decreasing = true
+		}
+
+		if safe {
+			newSafe := adjacentRule && increasing != decreasing
+
+			safe = newSafe
+		}
+	}
+	return safe
 }
