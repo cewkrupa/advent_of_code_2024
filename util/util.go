@@ -68,3 +68,7 @@ func Err(err error) {
 		panic(err)
 	}
 }
+
+func PrintLnF(v any) {
+	fmt.Printf("%v\n", v)
+}
